@@ -2,23 +2,19 @@ import pygame
 from pathlib import Path
 
 # --- Configurações do labirinto ---
-TAMANHO_CELULA = 800/17
+TAMANHO_CELULA = 800//22
 
 img = Path("img")  
 
 tile_grass = pygame.transform.scale(
     pygame.image.load(img / "tile-grass.png"),
-    (TAMANHO_CELULA, TAMANHO_CELULA)
+    (int(TAMANHO_CELULA), int(TAMANHO_CELULA))
 )
 
 tile_wood = pygame.transform.scale(
     pygame.image.load(img / "tile-wood.png"),
-    (TAMANHO_CELULA, TAMANHO_CELULA)
+    (int(TAMANHO_CELULA), int(TAMANHO_CELULA))
 )
-
-# COR_PAREDE = (70, 70, 200)
-# COR_CAMINHO = (200, 200, 200)
-# COR_SAIDA = (80, 200, 120)
 
 # MAPA FÁCIL
 LABIRINTO_FACIL =  [
@@ -35,7 +31,7 @@ LABIRINTO_FACIL =  [
     [1,1,1,0,1,0,1,1,1,0,1,1,1,0,1,0,1],
     [1,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,1],
     [1,0,1,1,1,1,1,0,1,1,1,0,1,1,1,1,1],
-    [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,1],
+    [1,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,2],
     [1,0,1,1,1,1,1,0,1,1,1,0,1,0,1,0,1],
     [1,0,1,0,0,0,0,0,1,0,0,0,1,0,0,0,1],
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -43,14 +39,28 @@ LABIRINTO_FACIL =  [
 
 # MAPA MÉDIO
 LABIRINTO_MEDIO = [
-    [1,1,1,1,1,1,1,1,1],
-    [1,0,0,1,0,0,0,0,1],
-    [1,0,1,1,1,1,0,1,1],
-    [1,0,1,0,0,0,0,0,1],
-    [1,0,1,0,1,1,1,0,1],
-    [1,0,0,0,0,0,1,0,1],
-    [1,1,1,1,1,0,1,2,1],
-    [1,1,1,1,1,1,1,1,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+    [1,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,1,0,0,0,1],
+    [1,1,1,0,1,0,1,1,0,1,0,1,1,0,1,1,0,1,0,1,0,1],
+    [1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,1],
+    [1,0,1,1,1,1,0,1,1,1,0,1,0,1,0,1,1,1,0,1,0,1],
+    [1,0,1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+    [1,0,1,0,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],
+    [1,0,0,0,1,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0,1],
+    [1,1,1,0,1,0,1,1,1,1,0,1,1,1,0,1,1,1,0,1,0,1],
+    [1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],
+    [1,0,1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1,1],
+    [1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1],
+    [1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1],
+    [1,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,1],
+    [1,0,1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,1,0,1,0,1],
+    [1,0,0,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,1],
+    [1,1,1,1,1,1,0,1,1,1,0,1,1,1,0,1,0,1,1,1,0,1],
+    [1,0,0,0,0,1,0,0,0,1,0,0,0,1,0,1,0,0,0,1,0,1],
+    [1,0,1,1,0,1,1,1,0,1,1,1,0,1,1,1,1,1,0,1,0,1],
+    [1,0,0,1,0,0,0,1,0,0,0,1,0,0,0,0,0,1,0,0,0,1],
+    [1,0,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,2,1],
+    [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
 ]
 
 # MAPA DIFÍCIL
@@ -68,19 +78,49 @@ LABIRINTO_DIFICIL = [
     [1,1,1,1,1,1,1,1,1,1,1],
 ]
 
+# --- Fases ---
+FASES = [LABIRINTO_FACIL, LABIRINTO_MEDIO, LABIRINTO_DIFICIL]
+fase_atual = 0
+
 # escolha padrão (pode trocar no jogo)
-LABIRINTO = LABIRINTO_FACIL
+LABIRINTO = FASES[fase_atual]
+
+def calcular_offset(tela):
+    """Calcula o deslocamento para centralizar o labirinto na tela."""
+    linhas = len(LABIRINTO)
+    colunas = len(LABIRINTO[0])
+
+    largura_total = colunas * TAMANHO_CELULA
+    altura_total = linhas * TAMANHO_CELULA
+
+    offset_x = (tela.get_width()  - largura_total) / 2
+    offset_y = (tela.get_height() - altura_total) / 2
+
+    return offset_x, offset_y
+
+def carregar_fase(indice):
+    """Muda o labirinto para a fase indicada."""
+    global LABIRINTO, fase_atual
+    fase_atual = indice
+    LABIRINTO = FASES[fase_atual]
+
+# escolha padrão (pode trocar no jogo)
+LABIRINTO = FASES[fase_atual]
 
 def desenhar_labirinto(tela):
+    offset_x, offset_y = calcular_offset(tela)
+
     for linha, row in enumerate(LABIRINTO):
         for coluna, cell in enumerate(row):
-            x = coluna * TAMANHO_CELULA
-            y = linha * TAMANHO_CELULA
+            x = int(offset_x + coluna * TAMANHO_CELULA)
+            y = int(offset_y + linha  * TAMANHO_CELULA)
 
             if cell == 1:
-                tela.blit(tile_grass, (x, y))  # parede
-            else:  # 0 (caminho) ou 2 (saída, se você não tratar separado)
+                tela.blit(tile_grass, (x, y))
+            else:
                 tela.blit(tile_wood, (x, y))
+
+
 
 
 # --- Configurações do jogador ---
@@ -89,11 +129,13 @@ POS_INICIAL = [1, 1]  # linha, coluna
 
 
 def desenhar_jogador(tela, posicao):
-    """Desenha o jogador (quadrado amarelo) na posição atual."""
     linha, coluna = posicao
-    x = coluna * TAMANHO_CELULA + 5
-    y = linha * TAMANHO_CELULA + 5
-    tamanho = TAMANHO_CELULA - 10
+    offset_x, offset_y = calcular_offset(tela)
+
+    x = int(offset_x + coluna * TAMANHO_CELULA + 5)
+    y = int(offset_y + linha  * TAMANHO_CELULA + 5)
+    tamanho = int(TAMANHO_CELULA - 10)
+
     pygame.draw.rect(tela, COR_JOGADOR, (x, y, tamanho, tamanho))
 
 

@@ -1,7 +1,7 @@
 import pygame
 import sys
 import base
-from base import desenhar_labirinto, desenhar_jogador, POS_INICIAL, posicao_valida
+from base import *
 
 pygame.init()
 
@@ -38,16 +38,16 @@ def menu_inicial():
         mouse_pos = pygame.mouse.get_pos()
         tela.fill(COR_FUNDO)
 
-        fonte_titulo = pygame.font.SysFont(None, 100, bold=True)
+        fonte_titulo = pygame.font.SysFont(None, 80, bold=True)
         titulo = fonte_titulo.render("Escolha a dificuldade", True, COR_TEXTO)
         tela.blit(titulo, (LARGURA_TELA // 2 - titulo.get_width() // 2, 180))
 
         centro_x = LARGURA_TELA // 2
         inicio_y = ALTURA_TELA // 2 - 100
 
-        botao_facil = desenhar_botao(tela, "Fácil", centro_x - 150, inicio_y, 300, 80, mouse_pos)
-        botao_medio = desenhar_botao(tela, "Médio", centro_x - 150, inicio_y + 130, 300, 80, mouse_pos)
-        botao_dificil = desenhar_botao(tela, "Difícil", centro_x - 150, inicio_y + 260, 300, 80, mouse_pos)
+        botao_facil = desenhar_botao(tela, "Fácil",   centro_x - 150, inicio_y,       300, 80, mouse_pos)
+        botao_medio = desenhar_botao(tela, "Médio",   centro_x - 150, inicio_y + 130, 300, 80, mouse_pos)
+        botao_dif   = desenhar_botao(tela, "Difícil", centro_x - 150, inicio_y + 260, 300, 80, mouse_pos)
 
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -56,32 +56,32 @@ def menu_inicial():
 
             if evento.type == pygame.MOUSEBUTTONDOWN:
                 if botao_facil.collidepoint(mouse_pos):
-                    base.LABIRINTO = base.LABIRINTO_FACIL
+                    carregar_fase(0)  # começa na fase fácil
                     return
                 elif botao_medio.collidepoint(mouse_pos):
-                    base.LABIRINTO = base.LABIRINTO_MEDIO
+                    carregar_fase(1)  # começa no médio
                     return
-                elif botao_dificil.collidepoint(mouse_pos):
-                    base.LABIRINTO = base.LABIRINTO_DIFICIL
+                elif botao_dif.collidepoint(mouse_pos):
+                    carregar_fase(2)  # começa no difícil
                     return
 
         pygame.display.flip()
         clock.tick(30)
 
 
-# --- Tela de vitória ---
+# --- Tela de vitória: Próxima fase / Sair ---
 def tela_vitoria():
     while True:
         mouse_pos = pygame.mouse.get_pos()
         tela.fill(COR_FUNDO)
 
-        fonte_titulo = pygame.font.SysFont(None, 100, bold=True)
+        fonte_titulo = pygame.font.SysFont(None, 80, bold=True)
         titulo = fonte_titulo.render("VOCÊ VENCEU! 🏆", True, COR_TEXTO)
-        tela.blit(titulo, (LARGURA_TELA // 2 - titulo.get_width() // 2, 250))
+        tela.blit(titulo, (LARGURA_TELA // 2 - titulo.get_width() // 2, 200))
 
         centro_x = LARGURA_TELA // 2
-        botao_reiniciar = desenhar_botao(tela, "Jogar novamente", centro_x - 200, 500, 400, 90, mouse_pos)
-        botao_sair = desenhar_botao(tela, "Sair", centro_x - 200, 650, 400, 90, mouse_pos)
+        botao_prox = desenhar_botao(tela, "Próxima fase", centro_x - 200, 400, 400, 90, mouse_pos)
+        botao_sair = desenhar_botao(tela, "Sair",          centro_x - 200, 520, 400, 90, mouse_pos)
 
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -89,12 +89,18 @@ def tela_vitoria():
                 sys.exit()
 
             if evento.type == pygame.MOUSEBUTTONDOWN:
-                if botao_reiniciar.collidepoint(mouse_pos):
-                    main()
-                    return
-                elif botao_sair.collidepoint(mouse_pos):
-                    pygame.quit()
-                    sys.exit()
+                # Se clicar em próxima fase
+                if botao_prox.collidepoint(mouse_pos):
+                    # Se ainda existe próxima fase
+                    if base.fase_atual < len(base.FASES) - 1:
+                        return "proxima"
+                    else:
+                        # se já é a última, tratar como sair
+                        return "sair"
+
+                # Se clicar em sair
+                if botao_sair.collidepoint(mouse_pos):
+                    return "sair"
 
         pygame.display.flip()
         clock.tick(30)
@@ -102,7 +108,7 @@ def tela_vitoria():
 
 # --- Loop principal do jogo ---
 def main():
-    menu_inicial()
+    menu_inicial()  # escolhe a fase inicial (dificuldade)
 
     pos_jogador = POS_INICIAL.copy()
     vitoria = False
@@ -135,11 +141,18 @@ def main():
         tela.fill(COR_FUNDO)
         desenhar_labirinto(tela)
         desenhar_jogador(tela, pos_jogador)
+        pygame.display.flip()
 
         if vitoria:
-            tela_vitoria()
+            escolha = tela_vitoria()
 
-        pygame.display.flip()
+            if escolha == "proxima":
+                # carrega a próxima fase
+                carregar_fase(base.fase_atual + 1)
+                pos_jogador = POS_INICIAL.copy()
+                vitoria = False
+            else:  # "sair"
+                rodando = False
 
     pygame.quit()
     sys.exit()
