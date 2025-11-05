@@ -110,7 +110,7 @@ def tela_vitoria():
 def main():
     menu_inicial()  # escolhe a fase inicial (dificuldade)
 
-    pos_jogador = POS_INICIAL.copy()
+    pos_jogador = base.encontrar_inicio()
     vitoria = False
     rodando = True
 
@@ -149,7 +149,7 @@ def main():
             if escolha == "proxima":
                 # carrega a próxima fase
                 carregar_fase(base.fase_atual + 1)
-                pos_jogador = POS_INICIAL.copy()
+                pos_jogador = base.encontrar_inicio()
                 vitoria = False
             else:  # "sair"
                 rodando = False
