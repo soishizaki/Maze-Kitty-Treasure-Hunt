@@ -1,7 +1,7 @@
 import pygame
 
 # --- Configurações do labirinto ---
-TAMANHO_CELULA = 50
+TAMANHO_CELULA = 94
 COR_PAREDE = (70, 70, 200)
 COR_CAMINHO = (200, 200, 200)
 
