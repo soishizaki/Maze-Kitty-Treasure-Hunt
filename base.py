@@ -1,10 +1,24 @@
 import pygame
+from pathlib import Path
 
 # --- Configurações do labirinto ---
 TAMANHO_CELULA = 800/17
-COR_PAREDE = (70, 70, 200)
-COR_CAMINHO = (200, 200, 200)
-COR_SAIDA = (80, 200, 120)
+
+img = Path("img")  
+
+tile_grass = pygame.transform.scale(
+    pygame.image.load(img / "tile-grass.png"),
+    (TAMANHO_CELULA, TAMANHO_CELULA)
+)
+
+tile_wood = pygame.transform.scale(
+    pygame.image.load(img / "tile-wood.png"),
+    (TAMANHO_CELULA, TAMANHO_CELULA)
+)
+
+# COR_PAREDE = (70, 70, 200)
+# COR_CAMINHO = (200, 200, 200)
+# COR_SAIDA = (80, 200, 120)
 
 # MAPA FÁCIL
 LABIRINTO_FACIL =  [
@@ -57,22 +71,16 @@ LABIRINTO_DIFICIL = [
 # escolha padrão (pode trocar no jogo)
 LABIRINTO = LABIRINTO_FACIL
 
-
 def desenhar_labirinto(tela):
-    """Desenha o labirinto na tela."""
     for linha, row in enumerate(LABIRINTO):
         for coluna, cell in enumerate(row):
             x = coluna * TAMANHO_CELULA
             y = linha * TAMANHO_CELULA
 
             if cell == 1:
-                cor = COR_PAREDE
-            elif cell == 2:
-                cor = COR_SAIDA
-            else:
-                cor = COR_CAMINHO
-
-            pygame.draw.rect(tela, cor, (x, y, TAMANHO_CELULA, TAMANHO_CELULA))
+                tela.blit(tile_grass, (x, y))  # parede
+            else:  # 0 (caminho) ou 2 (saída, se você não tratar separado)
+                tela.blit(tile_wood, (x, y))
 
 
 # --- Configurações do jogador ---
