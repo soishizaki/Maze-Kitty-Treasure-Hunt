@@ -16,6 +16,14 @@ tile_wood = pygame.transform.scale(
     (int(TAMANHO_CELULA), int(TAMANHO_CELULA))
 )
 
+TAMANHO_JOGADOR = int(TAMANHO_CELULA * 0.9)
+
+jogador_img = pygame.image.load(img / "gato.png")  
+jogador_img = pygame.transform.smoothscale(
+    jogador_img,
+    (TAMANHO_JOGADOR, TAMANHO_JOGADOR)
+)
+
 # MAPA FÁCIL
 LABIRINTO_FACIL = [
     [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
@@ -164,19 +172,19 @@ def desenhar_labirinto(tela):
 
 
 # --- Configurações do jogador ---
-COR_JOGADOR = (240, 230, 70)
 POS_INICIAL = encontrar_inicio()
-
 
 def desenhar_jogador(tela, posicao):
     linha, coluna = posicao
     offset_x, offset_y = calcular_offset(tela)
 
-    x = int(offset_x + coluna * TAMANHO_CELULA + 5)
-    y = int(offset_y + linha  * TAMANHO_CELULA + 5)
-    tamanho = int(TAMANHO_CELULA - 10)
+    # centraliza o gatinho dentro da célula
+    margem = (TAMANHO_CELULA - TAMANHO_JOGADOR) // 2
 
-    pygame.draw.rect(tela, COR_JOGADOR, (x, y, tamanho, tamanho))
+    x = int(offset_x + coluna * TAMANHO_CELULA + margem)
+    y = int(offset_y + linha  * TAMANHO_CELULA + margem)
+
+    tela.blit(jogador_img, (x, y))
 
 
 def posicao_valida(linha, coluna):
