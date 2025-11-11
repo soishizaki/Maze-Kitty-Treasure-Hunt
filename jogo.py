@@ -5,109 +5,118 @@ from base import *
 
 pygame.init()
 
-# --- Configurações da tela ---
+# --- Config da tela ---
 LARGURA_TELA = 800
 ALTURA_TELA = 800
-TITULO_JOGO = "Labirinto"
+TITULO_JOGO = "Maze Kitty Treasure Hunt"
 COR_FUNDO = (30, 30, 30)
-COR_TEXTO = (255, 255, 255)
-COR_BOTAO = (70, 70, 200)
-COR_BOTAO_HOVER = (100, 100, 255)
+COR_TEXTO = (255, 255, 255)  
 
 tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
 pygame.display.set_caption(TITULO_JOGO)
 clock = pygame.time.Clock()
 
+# === imagem de início  ===
+ASSETS = Path(__file__).parent / "img"
+IMG_INICIO = pygame.image.load(ASSETS / "inicio.png").convert()
+IMG_INICIO = pygame.transform.smoothscale(IMG_INICIO, (LARGURA_TELA, ALTURA_TELA))
 
-# --- Função para desenhar botão ---
-def desenhar_botao(tela, texto, x, y, largura, altura, mouse_pos):
-    fonte = pygame.font.SysFont(None, 60)
-    rect = pygame.Rect(x, y, largura, altura)
-    cor = COR_BOTAO_HOVER if rect.collidepoint(mouse_pos) else COR_BOTAO
+# === imagem próxima fase ===
+IMG_PROXIMA = pygame.image.load(ASSETS / "proxima_fase.png").convert()
+IMG_PROXIMA = pygame.transform.smoothscale(IMG_PROXIMA, (LARGURA_TELA, ALTURA_TELA))
 
-    pygame.draw.rect(tela, cor, rect, border_radius=12)
-    texto_img = fonte.render(texto, True, COR_TEXTO)
-    texto_rect = texto_img.get_rect(center=rect.center)
-    tela.blit(texto_img, texto_rect)
-    return rect
+# === imagem de vitória final ===
+IMG_FINAL = pygame.image.load(ASSETS / "fim.png").convert()
+IMG_FINAL = pygame.transform.smoothscale(IMG_FINAL, (LARGURA_TELA, ALTURA_TELA))
 
 
 # --- Tela de menu inicial ---
 def menu_inicial():
+    
+    botao_play = pygame.Rect(LARGURA_TELA // 2 - 165, 650, 330, 90)
+
     while True:
         mouse_pos = pygame.mouse.get_pos()
-        tela.fill(COR_FUNDO)
 
-        # Título do jogo
-        fonte_titulo = pygame.font.SysFont(None, 100, bold=True)
-        titulo = fonte_titulo.render("Labirinto", True, COR_TEXTO)
-        tela.blit(
-            titulo,
-            (LARGURA_TELA // 2 - titulo.get_width() // 2, 180)
-        )
+        tela.blit(IMG_INICIO, (0, 0))
 
-        # Botão único de PLAY
-        centro_x = LARGURA_TELA // 2
-        botao_play = desenhar_botao(
-            tela,
-            "Play",
-            centro_x - 150,
-            ALTURA_TELA // 2,
-            300,
-            80,
-            mouse_pos,
-        )
+        # brilho opcional ao passar o mouse
+        if botao_play.collidepoint(mouse_pos):
+            s = pygame.Surface((botao_play.width, botao_play.height), pygame.SRCALPHA)
+            s.fill((255, 255, 255, 25))
+            tela.blit(s, botao_play.topleft)
 
         for evento in pygame.event.get():
-            if evento.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-
-            if evento.type == pygame.MOUSEBUTTONDOWN:
-                if botao_play.collidepoint(mouse_pos):
-                    # Não escolhe dificuldade aqui.
-                    # Começa sempre da fase 0 (fácil),
-                    # que já é o padrão em base.py
+            if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
+                if botao_play.collidepoint(evento.pos):
                     return
 
-        pygame.display.flip()
-        clock.tick(30)
+            if evento.type == pygame.KEYDOWN and evento.key in (pygame.K_RETURN, pygame.K_SPACE):
+                return
 
-# --- Tela de vitória: Próxima fase / Sair ---
-def tela_vitoria():
+
+        pygame.display.flip()
+        clock.tick(60)
+
+# --- Tela de próxima fase ---
+def tela_proxima_fase():
+    
+    botao_next = pygame.Rect(LARGURA_TELA // 2 - 200, 620, 400, 100)
+
     while True:
         mouse_pos = pygame.mouse.get_pos()
-        tela.fill(COR_FUNDO)
+        tela.blit(IMG_PROXIMA, (0, 0))
 
-        fonte_titulo = pygame.font.SysFont(None, 80, bold=True)
-        titulo = fonte_titulo.render("FASE COMPLETA", True, COR_TEXTO)
-        tela.blit(titulo, (LARGURA_TELA // 2 - titulo.get_width() // 2, 200))
-
-        centro_x = LARGURA_TELA // 2
-        botao_prox = desenhar_botao(tela, "Próxima fase", centro_x - 200, 400, 400, 90, mouse_pos)
-        botao_sair = desenhar_botao(tela, "Sair",          centro_x - 200, 520, 400, 90, mouse_pos)
+        # hover
+        if botao_next.collidepoint(mouse_pos):
+            s = pygame.Surface((botao_next.width, botao_next.height), pygame.SRCALPHA)
+            s.fill((255, 255, 255, 20))
+            tela.blit(s, botao_next.topleft)
 
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-
-            if evento.type == pygame.MOUSEBUTTONDOWN:
-                # Se clicar em próxima fase
-                if botao_prox.collidepoint(mouse_pos):
-                    # Se ainda existe próxima fase
-                    if base.fase_atual < len(base.FASES) - 1:
-                        return "proxima"
-                    else:
-                        # se já é a última, tratar como sair
-                        return "sair"
-
-                # Se clicar em sair
-                if botao_sair.collidepoint(mouse_pos):
-                    return "sair"
+            if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
+                if botao_next.collidepoint(evento.pos):
+                    return
+            if evento.type == pygame.KEYDOWN and evento.key in (pygame.K_RETURN, pygame.K_SPACE):
+                return
 
         pygame.display.flip()
-        clock.tick(30)
+        clock.tick(60)
+
+
+
+# --- Tela de final/restart ---
+def tela_final():
+    
+    botao_play = pygame.Rect(LARGURA_TELA // 2 - 205, 617, 410, 95)
+    
+    while True:
+        mouse_pos = pygame.mouse.get_pos()
+        tela.blit(IMG_FINAL, (0, 0))
+
+        # botão opaco com leve brilho no hover
+        s = pygame.Surface((botao_play.width, botao_play.height), pygame.SRCALPHA)
+        if botao_play.collidepoint(mouse_pos):
+            s.fill((255, 255, 255, 40))  # brilho no hover
+        else:
+            s.fill((255, 255, 255, 15))  # leve opacidade padrão
+        tela.blit(s, botao_play.topleft)
+
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
+                if botao_play.collidepoint(evento.pos):
+                    return "reiniciar"
+            if evento.type == pygame.KEYDOWN and evento.key in (pygame.K_RETURN, pygame.K_SPACE):
+                return "reiniciar"
+
+        pygame.display.flip()
+        clock.tick(60)
 
 
 # --- Loop principal do jogo ---
@@ -152,15 +161,22 @@ def main():
         pygame.display.flip()
 
         if vitoria:
-            escolha = tela_vitoria()
-
-            if escolha == "proxima":
-                # carrega a próxima fase
+            if base.fase_atual < len(base.FASES) - 1:
+                # mostra a tela "Next Level" antes de seguir
+                tela_proxima_fase()
                 carregar_fase(base.fase_atual + 1)
                 pos_jogador = base.encontrar_inicio()
                 vitoria = False
-            else:  # "sair"
-                rodando = False
+            else:
+                escolha = tela_final()
+                if escolha == "reiniciar":
+                    carregar_fase(0)
+                    base.fase_atual = 0
+                    pos_jogador = base.encontrar_inicio()
+                    vitoria = False
+                else:
+                    rodando = False
+
 
     pygame.quit()
     sys.exit()
