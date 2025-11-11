@@ -2,6 +2,7 @@ import pygame
 import sys
 import base
 from base import *
+import random
 
 pygame.init()
 pygame.mixer.init()  # inicializa o áudio
@@ -159,23 +160,42 @@ def menu_inicial():
         pygame.display.flip()
         clock.tick(60)
 
+# Cores possíveis para as estrelinhas
+CORES_ESTRELAS = [
+    (255, 255, 0),   # amarelo
+    (255, 192, 203), # rosa
+    (135, 206, 250), # azul claro
+    (144, 238, 144), # verde claro
+    (255, 165, 0),   # laranja
+    (255, 255, 255)  # branco
+]
 
+def criar_estrela(multicolor=False):
+    """Cria uma estrelinha começando acima da tela."""
+    cor = random.choice(CORES_ESTRELAS) if multicolor else (255, 255, 0)
+    return {
+        "x": random.randint(0, LARGURA_TELA),
+        "y": random.randint(-ALTURA_TELA, 0),
+        "vel": random.uniform(1.5, 4.0),
+        "raio": random.randint(2, 4),
+        "cor": cor
+    }
 
 # --- Tela de próxima fase ---
 def tela_proxima_fase():
-    botao_next = pygame.Rect(LARGURA_TELA // 2 - 200,
-                             ALTURA_TELA - 180,
-                             400, 100)
+    botao_next = pygame.Rect(
+        LARGURA_TELA // 2 - 200,
+        ALTURA_TELA - 180,
+        400,
+        100
+    )
 
-    while True:
-        mouse_pos = pygame.mouse.get_pos()
-        tela.blit(IMG_PROXIMA, (0, 0))
+    # cria várias estrelinhas iniciais
+    estrelas = [criar_estrela() for _ in range(300)]
+    rodando = True
 
-        # hover
-        if botao_next.collidepoint(mouse_pos):
-            s = pygame.Surface((botao_next.width, botao_next.height), pygame.SRCALPHA)
-            s.fill((255, 255, 255, 20))
-            tela.blit(s, botao_next.topleft)
+    while rodando:
+        clock.tick(60)
 
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -195,27 +215,48 @@ def tela_proxima_fase():
                     SOM_BOTAO.play()
                     return
 
+        # atualiza posição das estrelinhas
+        for e in estrelas:
+            e["y"] += e["vel"]
+            # quando passa da parte de baixo, recria lá em cima
+            if e["y"] > ALTURA_TELA + 10:
+                novo = criar_estrela()
+                e["x"] = novo["x"]
+                e["y"] = novo["y"]
+                e["vel"] = novo["vel"]
+                e["raio"] = novo["raio"]
+
+        # desenha o fundo da tela de próxima fase
+        tela.blit(IMG_PROXIMA, (0, 0))
+
+        # desenha as estrelinhas por cima
+        for e in estrelas:
+            pygame.draw.circle(
+                tela,
+                (255, 255, 0),                      # amarelo estrela
+                (int(e["x"]), int(e["y"])),
+                e["raio"]
+            )
+
+        # (sem hover, só o botão mesmo – se quiser voltar com hover dá pra somar depois)
+
         pygame.display.flip()
-        clock.tick(60)
 
 
 # --- Tela de final/restart ---
 def tela_final():
-    botao_play = pygame.Rect(LARGURA_TELA // 2 - 205,
-                             ALTURA_TELA - 180,
-                             410, 95)
+    botao_play = pygame.Rect(
+        LARGURA_TELA // 2 - 205,
+        ALTURA_TELA - 180,
+        410,
+        95
+    )
+
+    # estrelinhas COLORIDAS na tela de vitória
+    estrelas = [criar_estrela(multicolor=True) for _ in range(500)]
 
     while True:
-        mouse_pos = pygame.mouse.get_pos()
-        tela.blit(IMG_FINAL, (0, 0))
-
-        # botão opaco com leve brilho no hover
-        s = pygame.Surface((botao_play.width, botao_play.height), pygame.SRCALPHA)
-        if botao_play.collidepoint(mouse_pos):
-            s.fill((255, 255, 255, 40))  # brilho no hover
-        else:
-            s.fill((255, 255, 255, 15))  # leve opacidade padrão
-        tela.blit(s, botao_play.topleft)
+        clock.tick(60)
 
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -235,9 +276,27 @@ def tela_final():
                     SOM_BOTAO.play()
                     return "reiniciar"
 
-        pygame.display.flip()
-        clock.tick(60)
+        # atualiza estrelas
+        for e in estrelas:
+            e["y"] += e["vel"]
+            if e["y"] > ALTURA_TELA + 10:
+                novo = criar_estrela(multicolor=True)
+                e["x"], e["y"], e["vel"], e["raio"], e["cor"] = \
+                    novo["x"], novo["y"], novo["vel"], novo["raio"], novo["cor"]
 
+        # desenha o fundo de vitória
+        tela.blit(IMG_FINAL, (0, 0))
+
+        # desenha estrelas por cima
+        for e in estrelas:
+            pygame.draw.circle(
+                tela,
+                e["cor"],
+                (int(e["x"]), int(e["y"])),
+                e["raio"]
+            )
+
+        pygame.display.flip()
 
 # --- Loop principal do jogo ---
 def main():
