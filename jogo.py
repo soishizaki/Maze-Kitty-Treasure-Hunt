@@ -16,8 +16,8 @@ SOM_BOTAO = pygame.mixer.Sound("sons/botao.mp3")
 SOM_BOTAO.set_volume(0.8)  # volume do som de clique
 
 # --- Config da tela ---
-LARGURA_TELA = 800
-ALTURA_TELA = 800
+LARGURA_TELA = 600
+ALTURA_TELA = 600
 TITULO_JOGO = "Maze Kitty Treasure Hunt"
 COR_FUNDO = (30, 30, 30)
 COR_TEXTO = (255, 255, 255)
@@ -25,6 +25,10 @@ COR_TEXTO = (255, 255, 255)
 tela = pygame.display.set_mode((LARGURA_TELA, ALTURA_TELA))
 pygame.display.set_caption(TITULO_JOGO)
 clock = pygame.time.Clock()
+
+# --- Fonte para o relógio ---
+TEMPO_FASE = 45  # segundos por fase
+FONT_TEMPO = pygame.font.SysFont("Arial", 32, bold=True)
 
 # === imagens ===
 IMG_INICIO = pygame.image.load("img/inicio.png").convert()
@@ -43,18 +47,26 @@ IMG_INFO = pygame.transform.smoothscale(IMG_INFO, (LARGURA_TELA, ALTURA_TELA))
 
 # --- Tela de informações (Instructions) ---
 def tela_infos():
-    # Retângulo clicável do BACK (posição para 800x800)
-    botao_back = pygame.Rect(600, 712, 142, 60)
+    # Botão BACK no canto inferior direito (para 600x600)
+    botao_back = pygame.Rect(LARGURA_TELA - 170, ALTURA_TELA - 80, 142, 60)
+    fonte_info = pygame.font.SysFont("Arial", 20, bold=True)
 
     while True:
-        mouse_pos = pygame.mouse.get_pos()
         tela.blit(IMG_INFO, (0, 0))
 
-        # realce sutil no botão back quando o mouse passa por cima (opcional)
-        s = pygame.Surface((botao_back.width, botao_back.height), pygame.SRCALPHA)
-        if botao_back.collidepoint(mouse_pos):
-            s.fill((255, 255, 255, 36))
-            tela.blit(s, botao_back.topleft)
+        # --- texto extra sobre o tempo por fase ---
+        linha1 = "Cada fase tem 45 segundos para ser concluída."
+        linha2 = "Se o tempo zerar, você volta para a primeira fase."
+
+        texto1 = fonte_info.render(linha1, True, COR_TEXTO)
+        texto2 = fonte_info.render(linha2, True, COR_TEXTO)
+
+        # posições (ajuste se quiser mudar o lugar)
+        tela.blit(texto1, (40, 400))
+        tela.blit(texto2, (40, 430))
+
+        # Se quiser ver a área clicável pra ajustar o botão BACK, descomente:
+        # pygame.draw.rect(tela, (0, 255, 0), botao_back, 2)
 
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -78,29 +90,28 @@ def tela_infos():
         clock.tick(60)
 
 
+
 # --- Tela de menu inicial ---
 def menu_inicial():
-    # Botão PLAY (coincide com a arte do "Play" em 800x800)
-    botao_play = pygame.Rect(LARGURA_TELA // 2 - 180, 620, 360, 90)
+    # Botão PLAY: centralizado mais perto da base
+    botao_play = pygame.Rect(
+        LARGURA_TELA // 2 - 130,  # centro - metade da largura (260/2)
+        ALTURA_TELA - 120,        # bem perto da parte de baixo
+        260,                      # largura
+        60                        # altura
+    )
 
-    # Botão/ícone INFO
-    botao_info = pygame.Rect(630, 635, 70, 70)
+    # Botão INFO: canto superior direito (posição segura em 600x600)
+    botao_info = pygame.Rect(
+        LARGURA_TELA - 115,  
+        480,                
+        70,                 
+        70                 
+    )
 
     while True:
         mouse_pos = pygame.mouse.get_pos()
         tela.blit(IMG_INICIO, (0, 0))
-
-        # brilho opcional ao passar o mouse (PLAY)
-        if botao_play.collidepoint(mouse_pos):
-            s = pygame.Surface((botao_play.width, botao_play.height), pygame.SRCALPHA)
-            s.fill((255, 255, 255, 25))
-            tela.blit(s, botao_play.topleft)
-
-        # brilho opcional no INFO
-        if botao_info.collidepoint(mouse_pos):
-            s = pygame.Surface((botao_info.width, botao_info.height), pygame.SRCALPHA)
-            s.fill((255, 255, 255, 25))
-            tela.blit(s, botao_info.topleft)
 
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -108,31 +119,39 @@ def menu_inicial():
                 sys.exit()
 
             if evento.type == pygame.KEYDOWN:
+                # ESC fecha o jogo
                 if evento.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
+                # Enter/Espaço = Play
                 if evento.key in (pygame.K_RETURN, pygame.K_SPACE):
                     SOM_BOTAO.play()
                     return
+                # tecla "i" abre a tela de infos
                 if evento.key == pygame.K_i:
                     SOM_BOTAO.play()
                     tela_infos()
 
             if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
+                # clique no PLAY
                 if botao_play.collidepoint(evento.pos):
                     SOM_BOTAO.play()
-                    return  # sai do menu e começa o jogo
+                    return
+                # clique no INFO
                 if botao_info.collidepoint(evento.pos):
                     SOM_BOTAO.play()
-                    tela_infos()  # abre a tela de instruções
+                    tela_infos()
 
         pygame.display.flip()
         clock.tick(60)
 
 
+
 # --- Tela de próxima fase ---
 def tela_proxima_fase():
-    botao_next = pygame.Rect(LARGURA_TELA // 2 - 200, 620, 400, 100)
+    botao_next = pygame.Rect(LARGURA_TELA // 2 - 200,
+                             ALTURA_TELA - 180,
+                             400, 100)
 
     while True:
         mouse_pos = pygame.mouse.get_pos()
@@ -168,7 +187,9 @@ def tela_proxima_fase():
 
 # --- Tela de final/restart ---
 def tela_final():
-    botao_play = pygame.Rect(LARGURA_TELA // 2 - 205, 617, 410, 95)
+    botao_play = pygame.Rect(LARGURA_TELA // 2 - 205,
+                             ALTURA_TELA - 180,
+                             410, 95)
 
     while True:
         mouse_pos = pygame.mouse.get_pos()
@@ -212,9 +233,13 @@ def main():
     vitoria = False
     rodando = True
 
+    # --- inicia o relógio da fase ---
+    tempo_inicial = pygame.time.get_ticks()  # em milissegundos
+
     while rodando:
         clock.tick(30)
 
+        # === EVENTOS ===
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 rodando = False
@@ -240,17 +265,39 @@ def main():
                         if base.LABIRINTO[nova_linha][nova_coluna] in (2, 3, 4):
                             vitoria = True
 
+        # === LÓGICA DO TEMPO ===
+        segundos_decorridos = (pygame.time.get_ticks() - tempo_inicial) / 1000
+        tempo_restante = max(0, int(TEMPO_FASE - segundos_decorridos))
+
+        # se o tempo acabar e ainda não venceu: volta para a PRIMEIRA FASE
+        if tempo_restante <= 0 and not vitoria:
+            base.fase_atual = 0
+            carregar_fase(0)
+            pos_jogador = base.encontrar_inicio()
+            vitoria = False
+            tempo_inicial = pygame.time.get_ticks()  # zera o relógio
+            continue
+
+        # === DESENHO ===
         tela.fill(COR_FUNDO)
         desenhar_labirinto(tela)
         desenhar_jogador(tela, pos_jogador)
+
+        # desenha o relógio no canto superior esquerdo
+        texto_tempo = FONT_TEMPO.render(f"Tempo: {tempo_restante:02d}s", True, COR_TEXTO)
+        tela.blit(texto_tempo, (20, 20))
+
         pygame.display.flip()
 
+        # === TROCA DE FASE / FINAL ===
         if vitoria:
             if base.fase_atual < len(base.FASES) - 1:
+                # mostra a tela "Next Level" antes de seguir
                 tela_proxima_fase()
                 carregar_fase(base.fase_atual + 1)
                 pos_jogador = base.encontrar_inicio()
                 vitoria = False
+                tempo_inicial = pygame.time.get_ticks()
             else:
                 escolha = tela_final()
                 if escolha == "reiniciar":
@@ -258,6 +305,7 @@ def main():
                     base.fase_atual = 0
                     pos_jogador = base.encontrar_inicio()
                     vitoria = False
+                    tempo_inicial = pygame.time.get_ticks()
                 else:
                     rodando = False
 

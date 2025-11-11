@@ -2,7 +2,7 @@ import pygame
 from pathlib import Path
 
 # --- Configurações do labirinto ---
-TAMANHO_CELULA = 800//25
+TAMANHO_CELULA = 600//25
 
 img = Path("img")  
 
