@@ -49,23 +49,11 @@ IMG_INFO = pygame.transform.smoothscale(IMG_INFO, (LARGURA_TELA, ALTURA_TELA))
 def tela_infos():
     # Botão BACK no canto inferior direito (para 600x600)
     botao_back = pygame.Rect(LARGURA_TELA - 170, ALTURA_TELA - 80, 142, 60)
-    fonte_info = pygame.font.SysFont("Arial", 20, bold=True)
 
     while True:
         tela.blit(IMG_INFO, (0, 0))
 
-        # --- texto extra sobre o tempo por fase ---
-        linha1 = "Cada fase tem 45 segundos para ser concluída."
-        linha2 = "Se o tempo zerar, você volta para a primeira fase."
-
-        texto1 = fonte_info.render(linha1, True, COR_TEXTO)
-        texto2 = fonte_info.render(linha2, True, COR_TEXTO)
-
-        # posições (ajuste se quiser mudar o lugar)
-        tela.blit(texto1, (40, 400))
-        tela.blit(texto2, (40, 430))
-
-        # Se quiser ver a área clicável pra ajustar o botão BACK, descomente:
+        # Se quiser ver a área clicável pra ajustar, descomente a linha abaixo:
         # pygame.draw.rect(tela, (0, 255, 0), botao_back, 2)
 
         for evento in pygame.event.get():
@@ -88,7 +76,6 @@ def tela_infos():
 
         pygame.display.flip()
         clock.tick(60)
-
 
 
 # --- Tela de menu inicial ---
