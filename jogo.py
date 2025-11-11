@@ -27,8 +27,8 @@ pygame.display.set_caption(TITULO_JOGO)
 clock = pygame.time.Clock()
 
 # --- Fonte para o relógio ---
-TEMPO_FASE = 45  # segundos por fase
-FONT_TEMPO = pygame.font.SysFont("Arial", 32, bold=True)
+TEMPO_FASE = 31  # segundos por fase
+FONT_TEMPO = pygame.font.SysFont("Arial", 15, bold=True)
 
 # === imagens ===
 IMG_INICIO = pygame.image.load("img/inicio.png").convert()
@@ -41,20 +41,31 @@ IMG_FINAL = pygame.image.load("img/fim.png").convert()
 IMG_FINAL = pygame.transform.smoothscale(IMG_FINAL, (LARGURA_TELA, ALTURA_TELA))
 
 # Tela de instruções (infos)
-IMG_INFO = pygame.image.load("img/infos.png").convert()
-IMG_INFO = pygame.transform.smoothscale(IMG_INFO, (LARGURA_TELA, ALTURA_TELA))
+# Telas de instruções (infos)
+# ajuste os nomes se seus arquivos tiverem outro nome
+IMG_INFO1 = pygame.image.load("img/infos1.png").convert()   # tela das setas + Next
+IMG_INFO1 = pygame.transform.smoothscale(IMG_INFO1, (LARGURA_TELA, ALTURA_TELA))
+
+IMG_INFO2 = pygame.image.load("img/infos2.png").convert()   # tela do tempo + Back
+IMG_INFO2 = pygame.transform.smoothscale(IMG_INFO2, (LARGURA_TELA, ALTURA_TELA))
 
 
-# --- Tela de informações (Instructions) ---
+# --- Telas de informações (Instructions, 2 páginas) ---
 def tela_infos():
-    # Botão BACK no canto inferior direito (para 600x600)
-    botao_back = pygame.Rect(LARGURA_TELA - 170, ALTURA_TELA - 80, 142, 60)
+    # botão no canto inferior direito (mesmo lugar nas duas imagens)
+    botao_rect = pygame.Rect(LARGURA_TELA - 170, ALTURA_TELA - 80, 142, 60)
+
+    pagina = 1  # começa na página 1 (setas)
 
     while True:
-        tela.blit(IMG_INFO, (0, 0))
+        # desenha a página atual
+        if pagina == 1:
+            tela.blit(IMG_INFO1, (0, 0))
+        else:
+            tela.blit(IMG_INFO2, (0, 0))
 
-        # Se quiser ver a área clicável pra ajustar, descomente a linha abaixo:
-        # pygame.draw.rect(tela, (0, 255, 0), botao_back, 2)
+        # DEBUG: pra ver a área clicável, descomenta:
+        # pygame.draw.rect(tela, (0, 255, 0), botao_rect, 2)
 
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -62,17 +73,35 @@ def tela_infos():
                 sys.exit()
 
             if evento.type == pygame.KEYDOWN:
+                # ESC fecha o jogo
                 if evento.key == pygame.K_ESCAPE:
                     pygame.quit()
                     sys.exit()
-                if evento.key in (pygame.K_RETURN, pygame.K_SPACE, pygame.K_BACKSPACE):
+
+                # Enter / Espaço:
+                # - na página 1 -> Next (vai pra página 2)
+                # - na página 2 -> Back (volta pro menu)
+                if evento.key in (pygame.K_RETURN, pygame.K_SPACE):
+                    SOM_BOTAO.play()
+                    if pagina == 1:
+                        pagina = 2
+                    else:
+                        return  # volta pro menu
+
+                # Backspace também funciona como "Back" na página 2
+                if pagina == 2 and evento.key == pygame.K_BACKSPACE:
                     SOM_BOTAO.play()
                     return
 
             if evento.type == pygame.MOUSEBUTTONDOWN and evento.button == 1:
-                if botao_back.collidepoint(evento.pos):
+                if botao_rect.collidepoint(evento.pos):
                     SOM_BOTAO.play()
-                    return  # volta ao menu
+                    if pagina == 1:
+                        # Next -> página 2
+                        pagina = 2
+                    else:
+                        # Back -> volta pro menu inicial
+                        return
 
         pygame.display.flip()
         clock.tick(60)
@@ -80,15 +109,13 @@ def tela_infos():
 
 # --- Tela de menu inicial ---
 def menu_inicial():
-    # Botão PLAY: centralizado mais perto da base
     botao_play = pygame.Rect(
-        LARGURA_TELA // 2 - 130,  # centro - metade da largura (260/2)
-        ALTURA_TELA - 120,        # bem perto da parte de baixo
-        260,                      # largura
-        60                        # altura
+        LARGURA_TELA // 2 - 130, 
+        ALTURA_TELA - 120,        
+        260,                      
+        60                        
     )
 
-    # Botão INFO: canto superior direito (posição segura em 600x600)
     botao_info = pygame.Rect(
         LARGURA_TELA - 115,  
         480,                
@@ -271,8 +298,8 @@ def main():
         desenhar_jogador(tela, pos_jogador)
 
         # desenha o relógio no canto superior esquerdo
-        texto_tempo = FONT_TEMPO.render(f"Tempo: {tempo_restante:02d}s", True, COR_TEXTO)
-        tela.blit(texto_tempo, (20, 20))
+        texto_tempo = FONT_TEMPO.render(f"Timer: {tempo_restante:02d} seconds", True, COR_TEXTO)
+        tela.blit(texto_tempo, (15, 5))
 
         pygame.display.flip()
 
